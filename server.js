@@ -70,3 +70,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 PlaticaM Backend corriendo en puerto ${PORT}`);
 });
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'PlaticaM Backend funcionando correctamente' });
+});
