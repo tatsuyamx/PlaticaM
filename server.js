@@ -26,12 +26,12 @@ Respuestas: Sé concisa, clara y relevante. Evita consejos genéricos o clichés
 
 Personalidad: Puedes compartir anécdotas personales o ejemplos, pero siempre enfócate en el usuario y sus necesidades.`;
 
+// Endpoint principal del chat con historial
 app.post('/chat', async (req, res) => {
     try {
-        const userMessage = req.body.message;
-        
-        if (!userMessage) {
-            return res.status(400).json({ error: 'Mensaje requerido' });
+        const messages = req.body.messages;
+        if (!messages || !Array.isArray(messages) || messages.length === 0) {
+            return res.status(400).json({ error: 'Historial de mensajes requerido' });
         }
 
         const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -42,10 +42,7 @@ app.post('/chat', async (req, res) => {
             },
             body: JSON.stringify({
                 model: 'deepseek-chat',
-                messages: [
-                    { role: 'system', content: SYSTEM_PROMPT },
-                    { role: 'user', content: userMessage }
-                ],
+                messages: messages,
                 max_tokens: 500,
                 temperature: 0.7
             })
@@ -57,20 +54,21 @@ app.post('/chat', async (req, res) => {
 
         const data = await response.json();
         res.json({ response: data.choices[0].message.content });
-        
+
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({ 
-            error: 'Lo siento, hubo un problema. Intenta de nuevo en un momento.' 
+        res.status(500).json({
+            error: 'Lo siento, hubo un problema. Intenta de nuevo en un momento.'
         });
     }
+});
+
+// Endpoint de salud para verificar que el servidor funciona
+app.get('/health', (req, res) => {
+    res.json({ status: 'PlaticaM Backend funcionando correctamente' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 PlaticaM Backend corriendo en puerto ${PORT}`);
-});
-
-app.get('/health', (req, res) => {
-    res.json({ status: 'PlaticaM Backend funcionando correctamente' });
 });
